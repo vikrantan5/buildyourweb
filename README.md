@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BuildWithMe — Portfolio + Admin Panel
 
-## Getting Started
+**Webs • Apps • And More** — *Ideas → Code → Reality.*
 
-First, run the development server:
+A production-ready portfolio for a freelance developer: an immersive dark site with a 3D hero, a
+3-view work showcase (GSAP-pinned Showcase, animated Grid, typographic List), case-study pages,
+and a private **/admin** panel where the owner manages **everything** — projects, services, tech
+stack, testimonials, FAQs, stats, inquiries and site settings — with no code changes or redeploys.
+
+## Stack
+
+- **Next.js 14 (App Router) + TypeScript**, Server Components + Server Actions
+- **Tailwind CSS + shadcn/ui-style components** (admin)
+- **Framer Motion + GSAP ScrollTrigger + Lenis** (scroll storytelling, smooth scroll)
+- **React Three Fiber + drei** — the glossy two-ribbon "W" logo (lazy-loaded, CSS fallback on low-end devices / reduced motion)
+- **Supabase** — Postgres, Auth, Storage, RLS (`@supabase/ssr`)
+- **Zod + react-hook-form** everywhere input happens
+- Deploys to **Vercel**
+
+## 1. Supabase setup (one time, ~2 minutes)
+
+1. Open your Supabase project → **SQL Editor → New query**.
+2. Paste the whole of `supabase/migrations/0001_schema.sql` → **Run**.
+   (Tables, RLS policies, the `portfolio-media` storage bucket.)
+3. Paste the whole of `supabase/migrations/0002_seed.sql` → **Run**.
+   (Settings, services, tech stack, FAQs, stats + 4 **sample projects** — clearly marked,
+   deletable from the admin panel later.)
+
+> The seed references cover images that ship with this repo at `public/samples/*`, so the site
+> looks complete immediately.
+
+## 2. Create the admin user
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install            # or: yarn install --ignore-engines  (if your Node < 22 warns on engines)
+npm run create-admin admin@buildwithme.dev YourPasswordHere
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This creates a confirmed auth user, sets the password and grants admin via the `admins` table.
+You can also change `ADMIN_EMAIL` in `.env.local` — that email is trusted automatically.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 3. Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local` (already included with this project's keys — see `.env.example` for a template):
 
-## Learn More
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...   # server-only, used just by scripts/create-admin.mjs
+ADMIN_EMAIL=admin@buildwithme.dev
+NEXT_PUBLIC_SITE_URL=http://localhost:3000   # your production URL when deployed
+```
 
-To learn more about Next.js, take a look at the following resources:
+> `SUPABASE_SERVICE_ROLE_KEY` is never used in client code — only the Node script.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 4. Run locally
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev     # http://localhost:3000
+```
 
-## Deploy on Vercel
+- Public site: `/`
+- Admin panel: `/admin` (login at `/admin/login`)
+- Branded 404 at any unknown route · sitemap at `/sitemap.xml`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 5. Deploy to Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push this folder to a Git repo and import it in Vercel.
+2. Add the five env vars above (set `NEXT_PUBLIC_SITE_URL` to your final domain).
+3. Deploy — done. Admin edits appear on the public site **instantly** (server actions call
+   `revalidatePath`); no redeploys needed.
+
+## Admin panel — what you can manage
+
+| Area | What you can do |
+|---|---|
+| **Projects** | Add / edit / duplicate / delete, drag-and-drop ordering, featured star, draft↔published, bulk publish, search. Cover image + preview video + gallery with drag-reorder (client-side compression + upload progress). Live preview of card + case-study hero while editing. |
+| **Services** | Full CRUD, "what's included" list, starting price, visibility toggle |
+| **Tech stack** | Full CRUD, feeds the orbit + tech filter |
+| **Testimonials** | Full CRUD + visibility (section auto-hides when empty) |
+| **FAQs** | Full CRUD + visibility |
+| **Stats** | Animated counters: label, value, suffix, visibility |
+| **Inquiries** | Contact-form inbox: search, new/replied/closed status, delete, CSV export |
+| **Site settings** | Hero copy, badge, about text, Instagram/WhatsApp/email, SEO title/description, OG image, availability toggle |
+| **Media library** | Browse + delete every uploaded file |
+
+## Security model
+
+- Public visitors (anon): read **published/visible** rows only; may **insert** into `inquiries`
+  (length-checked); no read access to inquiries.
+- Admin: full access via RLS `is_admin()` (checks the `admins` table). The `/admin` area is
+  protected by **middleware** and re-verified **server-side in every server action**.
+- Storage bucket `portfolio-media`: public read, admin-only write.
+
+## Project structure
+
+```
+app/               # routes (public, /admin, case studies, sitemap, robots, OG images)
+components/public/ # hero, 3D logo, work showcase (3 views), sections, cursor, preloader...
+components/admin/  # projects manager, project form, generic CRUD manager, media uploader
+components/ui/     # shadcn-style primitives
+actions/           # server actions (projects, content, inquiries, media, auth)
+lib/               # supabase clients, validators (zod), data fetchers with graceful fallback
+supabase/migrations/ # schema + seed SQL
+scripts/create-admin.mjs
+public/samples/    # sample project artwork used by the seed
+```
+
+## Good to know
+
+- The site **never looks broken** even before migrations are run: `lib/data.ts` falls back to
+  clearly-marked sample content, and the admin shows friendly empty states. Run the two SQL
+  files and everything goes live.
+- Type `b-u-i-l-d` anywhere on the site for a light show. ✦
+- If `npm install` complains about engines (Node 20), run `yarn install --ignore-engines` or use Node 22.
