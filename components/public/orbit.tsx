@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Layers, Sparkles } from 'lucide-react';
 import type { TechStackItem } from '@/types/database';
@@ -15,6 +15,20 @@ function iconFor(name: string) {
 
 export default function Orbit({ items }: { items: TechStackItem[] }) {
   const [paused, setPaused] = useState(false);
+
+    const wrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const w = wrapRef.current?.clientWidth ?? 672;
+      setScale(Math.min(1, Math.max(0.52, (w - 12) / 560)));
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   if (!items.length) return null;
   const rings = [items.slice(0, Math.ceil(items.length / 2)), items.slice(Math.ceil(items.length / 2))].filter((r) => r.length);
 
@@ -27,7 +41,9 @@ export default function Orbit({ items }: { items: TechStackItem[] }) {
         </h2>
 
         <div
-          className="relative mx-auto mt-16 h-[420px] w-full max-w-2xl sm:h-[480px]"
+           ref={wrapRef}
+          className="relative mx-auto mt-16 w-full max-w-2xl"
+          style={{ height: Math.round(460 * scale) + 60 }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           data-testid="tech-orbit"
@@ -39,7 +55,7 @@ export default function Orbit({ items }: { items: TechStackItem[] }) {
           </div>
 
           {rings.map((ring, ri) => {
-            const radius = ri === 0 ? 150 : 215;
+           const radius = Math.round((ri === 0 ? 150 : 215) * scale);
             const duration = ri === 0 ? 26 : 38;
             return (
               <div
