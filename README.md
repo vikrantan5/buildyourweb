@@ -41,7 +41,7 @@ You can also change `ADMIN_EMAIL` in `.env.local` — that email is trusted auto
 
 ## 3. Environment variables
 
-`.env.local` (already included with this project's keys — see `.env.example` for a template):
+`.env.local` (copy from the template — `cp .env.example .env.local` — then paste your keys):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=...

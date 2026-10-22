@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BarChart3, Briefcase, HelpCircle, Inbox, LayoutDashboard, Layers, LogOut, Menu, Settings, Smartphone, Sparkles, Users, Wrench, X, ExternalLink } from 'lucide-react';
@@ -50,7 +51,7 @@ export default function AdminSidebar({ email }: { email: string }) {
         )}
       >
         <div className="flex items-center gap-2.5 px-5 pt-6 pb-8">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-electric to-violett font-display text-lg font-bold">W</span>
+          <Image src="/logo.png" alt="BuildWithMe logo" width={36} height={36} className="h-9 w-9 rounded-xl" priority />
           <div>
             <p className="font-display text-sm font-bold">BuildWithMe</p>
             <p className="font-mono text-[10px] text-white/40">admin panel</p>

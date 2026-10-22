@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: siteUrl,
       siteName: 'BuildWithMe',
       type: 'website',
-      images: s.og_image ? [{ url: s.og_image }] : undefined,
+      images: [{ url: s.og_image || '/logo.png' }],
     },
     twitter: { card: 'summary_large_image', title: s.seo_title, description: s.seo_description },
     icons: { icon: '/icon.svg' },

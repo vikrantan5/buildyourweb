@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +42,7 @@ export default function AdminLoginPage() {
       <div className="absolute h-80 w-80 rounded-full bg-violett/15 blur-[110px]" aria-hidden />
       <div className="relative w-full max-w-sm rounded-2xl glass p-8" data-testid="admin-login-card">
         <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-electric to-violett font-display font-bold">W</span>
+          <Image src="/logo.png" alt="BuildWithMe logo" width={40} height={40} className="h-10 w-10 rounded-xl" priority />
           <div>
             <h1 className="font-display text-lg font-bold">Admin Login</h1>
             <p className="text-xs text-white/45">Owner access only</p>
